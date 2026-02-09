@@ -20,7 +20,7 @@ wheels/
 .installed.cfg
 *.egg
 
-# Sanal ortam
+# Virtual environment
 venv/
 .venv/
 env/
@@ -33,11 +33,11 @@ env/
 *.swo
 *~
 
-# Analiz çıktıları (isteğe bağlı: bu satırı kaldırırsanız output/ de repoya eklenir)
+# Analysis output (remove this line to include output/ in the repo)
 output/
 
-# İsteğe bağlı: büyük örnek veriyi repoya eklemek istemezseniz açın
-# ornek_veri.csv
+# Optional: uncomment to exclude large sample data from the repo
+# sample_data.csv
 
 # OS
 .DS_Store
