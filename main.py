@@ -10,7 +10,14 @@ from pathlib import Path
 
 from data_loader import load_data
 from analyzer import DataAnalyzer
-from visualizer import generate_all_plots, HAS_PLOT
+from visualizer import generate_all_plots, generate_html_report, HAS_PLOT
+
+try:
+    from ai_insights import generate_insights
+    HAS_AI = True
+except ImportError:
+    HAS_AI = False
+    generate_insights = None
 
 
 def print_section(title: str):
@@ -19,7 +26,7 @@ def print_section(title: str):
     print("=" * 60)
 
 
-def run_analysis(file_path: str, output_dir: str = "output", no_plots: bool = False):
+def run_analysis(file_path: str, output_dir: str = "output", no_plots: bool = False, use_ai: bool = True):
     """
     Dosyayı yükler, analiz eder ve sonuçları yazar.
     """
@@ -75,13 +82,34 @@ def run_analysis(file_path: str, output_dir: str = "output", no_plots: bool = Fa
         print_section("KORELASYON MATRİSİ")
         print(analyzer.correlation_matrix().to_string())
 
+    # Yapay zeka özeti (opsiyonel)
+    ai_insight_text = None
+    if use_ai and HAS_AI and generate_insights:
+        print_section("YAPAY ZEKA ÖZETİ")
+        try:
+            summary = analyzer.summary()
+            desc_text = analyzer.describe_numeric().to_string() if not analyzer.describe_numeric().empty else ""
+            corr_text = analyzer.correlation_matrix().to_string() if len(analyzer.numeric_cols) >= 2 else ""
+            ai_insight_text = generate_insights(summary, desc_text, corr_text)
+            if ai_insight_text:
+                print(ai_insight_text)
+            else:
+                print("  (OPENAI_API_KEY tanımlı değil veya API yanıt vermedi)")
+        except Exception as e:
+            print(f"  AI özet atlandı: {e}")
+
     # Grafikler
+    generated = []
     if HAS_PLOT and not no_plots:
         print_section("GRAFİKLER")
         try:
             generated = generate_all_plots(analyzer, output_path=output_dir)
             for path in generated:
                 print(f"  ✓ {path}")
+            # HTML rapor (grafikler + AI özet)
+            report_path = generate_html_report(output_dir, generated, ai_insight=ai_insight_text)
+            if report_path:
+                print(f"  ✓ {report_path}")
         except Exception as e:
             print(f"  Grafik oluşturma hatası: {e}")
     elif no_plots:
@@ -126,10 +154,15 @@ def main():
         action="store_true",
         help="Grafik oluşturma",
     )
+    parser.add_argument(
+        "--no-ai",
+        action="store_true",
+        help="Yapay zeka özetini kapatır (OPENAI_API_KEY yoksa zaten atlanır)",
+    )
     args = parser.parse_args()
 
     if args.dosya:
-        run_analysis(args.dosya, output_dir=args.output, no_plots=args.no_plots)
+        run_analysis(args.dosya, output_dir=args.output, no_plots=args.no_plots, use_ai=not args.no_ai)
         return
 
     # Etkileşimli: dosya yolu sor
@@ -139,7 +172,7 @@ def main():
     if not file_path:
         print("Çıkılıyor.")
         sys.exit(0)
-    run_analysis(file_path, output_dir=args.output, no_plots=args.no_plots)
+    run_analysis(file_path, output_dir=args.output, no_plots=args.no_plots, use_ai=not args.no_ai)
 
 
 if __name__ == "__main__":
