@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Sanal ortam
+venv/
+.venv/
+env/
+.env/
+
+# IDE / Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Analiz çıktıları (isteğe bağlı: bu satırı kaldırırsanız output/ de repoya eklenir)
+output/
+
+# İsteğe bağlı: büyük örnek veriyi repoya eklemek istemezseniz açın
+# ornek_veri.csv
+
+# OS
+.DS_Store
+Thumbs.db
