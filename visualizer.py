@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Görselleştirme modülü - gelişmiş grafikler ve HTML rapor.
+Visualization module — charts and HTML report.
 """
 
 import pandas as pd
@@ -16,7 +16,6 @@ try:
 except ImportError:
     HAS_PLOT = False
 
-# Modern görsel tema
 if HAS_PLOT:
     plt.rcParams["font.family"] = "DejaVu Sans"
     plt.rcParams["axes.facecolor"] = "#f8f9fa"
@@ -24,10 +23,7 @@ if HAS_PLOT:
     sns.set_style("whitegrid")
     sns.set_palette("husl")
 
-# Renk paletleri (görsel şölen)
-PALET_GRADIYAN = ["#1a1a2e", "#16213e", "#0f3460", "#e94560", "#ff6b6b"]
 PALET_CANLI = ["#667eea", "#764ba2", "#f093fb", "#4facfe", "#00f2fe", "#43e97b"]
-PALET_ISI = ["#2d1b69", "#11998e", "#38ef7d", "#f7971e", "#ff416c"]
 
 
 def _ensure_output_dir(output_dir: str) -> Path:
@@ -41,7 +37,7 @@ def _safe_filename(name: str) -> str:
 
 
 def plot_correlation_heatmap(df: pd.DataFrame, output_path: str = "output") -> str | None:
-    """Korelasyon ısı haritası - gelişmiş stil."""
+    """Correlation heatmap."""
     if not HAS_PLOT:
         return None
     numeric = df.select_dtypes(include=[np.number])
@@ -50,22 +46,21 @@ def plot_correlation_heatmap(df: pd.DataFrame, output_path: str = "output") -> s
     out = _ensure_output_dir(output_path)
     fig, ax = plt.subplots(figsize=(10, 8))
     corr = numeric.corr()
-    mask = np.triu(np.ones_like(corr, dtype=bool), k=1)  # Üst üçgen maskele (opsiyonel)
     sns.heatmap(
         corr, annot=True, fmt=".2f", cmap="RdYlBu_r", center=0,
         ax=ax, square=True, linewidths=0.5, cbar_kws={"shrink": 0.8},
         vmin=-1, vmax=1, annot_kws={"size": 9}
     )
-    ax.set_title("Korelasyon Matrisi", fontsize=14, fontweight="bold")
+    ax.set_title("Correlation Matrix", fontsize=14, fontweight="bold")
     plt.tight_layout()
-    filepath = out / "korelasyon_haritasi.png"
+    filepath = out / "correlation_heatmap.png"
     plt.savefig(filepath, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close()
     return str(filepath)
 
 
 def plot_distribution(df: pd.DataFrame, column: str, output_path: str = "output") -> str | None:
-    """Dağılım grafiği - gradient dolgulu histogram."""
+    """Distribution histogram with gradient fill."""
     if not HAS_PLOT or column not in df.columns:
         return None
     if not pd.api.types.is_numeric_dtype(df[column]):
@@ -76,23 +71,22 @@ def plot_distribution(df: pd.DataFrame, column: str, output_path: str = "output"
         return None
     fig, ax = plt.subplots(figsize=(9, 5))
     n, bins, patches = ax.hist(data, bins=min(40, len(data.unique()) or 20), edgecolor="white", linewidth=0.5)
-    # Gradient renk
     for i, p in enumerate(patches):
         p.set_facecolor(plt.cm.viridis(i / max(len(patches), 1)))
-    ax.set_title(f"Dağılım: {column}", fontsize=13, fontweight="bold")
+    ax.set_title(f"Distribution: {column}", fontsize=13, fontweight="bold")
     ax.set_xlabel(column)
-    ax.set_ylabel("Frekans")
+    ax.set_ylabel("Frequency")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     plt.tight_layout()
-    filepath = out / f"dagilim_{_safe_filename(column)}.png"
+    filepath = out / f"distribution_{_safe_filename(column)}.png"
     plt.savefig(filepath, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close()
     return str(filepath)
 
 
 def plot_value_counts(df: pd.DataFrame, column: str, top_n: int = 15, output_path: str = "output") -> str | None:
-    """Değer sayıları - yatay çubuk, canlı renkler."""
+    """Value counts — horizontal bar chart."""
     if not HAS_PLOT or column not in df.columns:
         return None
     out = _ensure_output_dir(output_path)
@@ -101,23 +95,23 @@ def plot_value_counts(df: pd.DataFrame, column: str, top_n: int = 15, output_pat
         return None
     fig, ax = plt.subplots(figsize=(10, 6))
     colors = plt.cm.Spectral(np.linspace(0.2, 0.9, len(counts)))
-    bars = ax.barh(range(len(counts)), counts.values, color=colors, edgecolor="white", linewidth=0.5)
+    ax.barh(range(len(counts)), counts.values, color=colors, edgecolor="white", linewidth=0.5)
     ax.set_yticks(range(len(counts)))
     ax.set_yticklabels(counts.index, fontsize=9)
     ax.invert_yaxis()
-    ax.set_title(f"En Sık Değerler: {column} (İlk {top_n})", fontsize=13, fontweight="bold")
-    ax.set_xlabel("Adet")
+    ax.set_title(f"Top Values: {column} (Top {top_n})", fontsize=13, fontweight="bold")
+    ax.set_xlabel("Count")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     plt.tight_layout()
-    filepath = out / f"deger_sayilari_{_safe_filename(column)}.png"
+    filepath = out / f"value_counts_{_safe_filename(column)}.png"
     plt.savefig(filepath, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close()
     return str(filepath)
 
 
 def plot_scatter(df: pd.DataFrame, col_x: str, col_y: str, output_path: str = "output") -> str | None:
-    """İki sayısal sütun için scatter plot - renkli, şeffaf noktalar."""
+    """Scatter plot for two numeric columns."""
     if not HAS_PLOT or col_x not in df.columns or col_y not in df.columns:
         return None
     if not pd.api.types.is_numeric_dtype(df[col_x]) or not pd.api.types.is_numeric_dtype(df[col_y]):
@@ -141,7 +135,7 @@ def plot_scatter(df: pd.DataFrame, col_x: str, col_y: str, output_path: str = "o
 
 
 def plot_box(df: pd.DataFrame, column: str, output_path: str = "output") -> str | None:
-    """Kutu grafiği - sayısal sütun dağılımı."""
+    """Box plot for a numeric column."""
     if not HAS_PLOT or column not in df.columns:
         return None
     if not pd.api.types.is_numeric_dtype(df[column]):
@@ -155,19 +149,19 @@ def plot_box(df: pd.DataFrame, column: str, output_path: str = "output") -> str 
     bp["boxes"][0].set_facecolor("#4facfe")
     bp["boxes"][0].set_alpha(0.7)
     ax.set_ylabel(column)
-    ax.set_title(f"Kutu Grafiği: {column}", fontsize=13, fontweight="bold")
+    ax.set_title(f"Box Plot: {column}", fontsize=13, fontweight="bold")
     ax.set_xticklabels([column])
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     plt.tight_layout()
-    filepath = out / f"kutu_{_safe_filename(column)}.png"
+    filepath = out / f"box_{_safe_filename(column)}.png"
     plt.savefig(filepath, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close()
     return str(filepath)
 
 
 def plot_missing_values(df: pd.DataFrame, output_path: str = "output") -> str | None:
-    """Eksik değerler - sütun bazlı."""
+    """Missing values per column."""
     if not HAS_PLOT:
         return None
     missing = df.isnull().sum()
@@ -178,60 +172,57 @@ def plot_missing_values(df: pd.DataFrame, output_path: str = "output") -> str | 
     fig, ax = plt.subplots(figsize=(8, max(4, len(missing) * 0.35)))
     colors = plt.cm.Reds(np.linspace(0.4, 0.9, len(missing)))
     missing.plot(kind="barh", ax=ax, color=colors, edgecolor="white")
-    ax.set_title("Eksik Değer Sayıları (Sütun Bazlı)", fontsize=13, fontweight="bold")
-    ax.set_xlabel("Eksik Adet")
+    ax.set_title("Missing Values by Column", fontsize=13, fontweight="bold")
+    ax.set_xlabel("Missing Count")
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     plt.tight_layout()
-    filepath = out / "eksik_degerler.png"
+    filepath = out / "missing_values.png"
     plt.savefig(filepath, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close()
     return str(filepath)
 
 
 def plot_dashboard(df: pd.DataFrame, numeric_cols: list, output_path: str = "output") -> str | None:
-    """Tek sayfada özet dashboard: korelasyon + 2 dağılım + 1 değer sayısı."""
+    """Single-page dashboard: correlation + 2 distributions + 1 value counts."""
     if not HAS_PLOT:
         return None
     out = _ensure_output_dir(output_path)
     n_num = len(numeric_cols)
     cat_cols = df.select_dtypes(include=["object", "category"]).columns.tolist()
     fig = plt.figure(figsize=(14, 10))
-    fig.suptitle("Big Data Analiz - Özet Dashboard", fontsize=16, fontweight="bold", y=1.02)
+    fig.suptitle("Big Data Analysis — Summary Dashboard", fontsize=16, fontweight="bold", y=1.02)
 
-    # 1) Korelasyon (en az 2 sayısal varsa)
     if n_num >= 2:
         ax1 = fig.add_subplot(2, 2, 1)
         corr = df[numeric_cols].corr()
         sns.heatmap(corr, annot=True, fmt=".1f", cmap="coolwarm", center=0, ax=ax1, square=True, cbar_kws={"shrink": 0.7})
-        ax1.set_title("Korelasyon")
-    # 2-3) İlk iki sayısal dağılım
+        ax1.set_title("Correlation")
     for i, col in enumerate(numeric_cols[:2]):
         ax = fig.add_subplot(2, 2, 2 + i)
         df[col].dropna().hist(ax=ax, bins=25, color=PALET_CANLI[i % len(PALET_CANLI)], edgecolor="white")
-        ax.set_title(f"Dağılım: {col}")
+        ax.set_title(f"Distribution: {col}")
         ax.set_xlabel(col)
-    # 4) Bir kategorik değer sayısı
     if cat_cols:
         ax4 = fig.add_subplot(2, 2, 4)
         counts = df[cat_cols[0]].value_counts().head(10)
         counts.plot(kind="barh", ax=ax4, color=plt.cm.Paired(np.linspace(0, 1, len(counts))))
-        ax4.set_title(f"En sık: {cat_cols[0]}")
+        ax4.set_title(f"Top: {cat_cols[0]}")
         ax4.invert_yaxis()
     else:
         ax4 = fig.add_subplot(2, 2, 4)
-        ax4.text(0.5, 0.5, "Kategorik sütun yok", ha="center", va="center", transform=ax4.transAxes)
+        ax4.text(0.5, 0.5, "No categorical columns", ha="center", va="center", transform=ax4.transAxes)
         ax4.set_axis_off()
 
     plt.tight_layout()
-    filepath = out / "dashboard_ozet.png"
+    filepath = out / "dashboard_summary.png"
     plt.savefig(filepath, dpi=150, bbox_inches="tight", facecolor="white")
     plt.close()
     return str(filepath)
 
 
 def generate_all_plots(analyzer, output_path: str = "output") -> list[str]:
-    """Tüm gelişmiş grafikleri üretir."""
+    """Generate all charts."""
     df = analyzer.get_dataframe()
     numeric_cols = analyzer.numeric_cols
     categorical_cols = analyzer.categorical_cols
@@ -244,7 +235,6 @@ def generate_all_plots(analyzer, output_path: str = "output") -> list[str]:
         p = plot_dashboard(df, numeric_cols, output_path)
         if p:
             generated.append(p)
-        # İlk iki sayısal için scatter
         p = plot_scatter(df, numeric_cols[0], numeric_cols[1], output_path)
         if p:
             generated.append(p)
@@ -273,20 +263,19 @@ def generate_html_report(
     output_path: str,
     plot_files: list[str],
     ai_insight: str | None = None,
-    title: str = "Big Data Analiz Raporu",
+    title: str = "Big Data Analysis Report",
 ) -> str | None:
-    """Tüm grafikleri ve isteğe bağlı AI özetini içeren HTML rapor oluşturur."""
+    """Build HTML report with all charts and optional AI summary."""
     out = Path(output_path)
     out.mkdir(parents=True, exist_ok=True)
     plot_files = [Path(p) for p in plot_files if Path(p).exists()]
-    # Rapor için grafikleri output klasörüne göre relative path yap
     rel_paths = [p.name for p in plot_files if p.parent == out]
 
     ai_block = ""
     if ai_insight:
         ai_block = f"""
         <section class="ai-section">
-            <h2>Yapay Zeka Özeti</h2>
+            <h2>AI Summary</h2>
             <div class="ai-content">{ai_insight.replace(chr(10), "<br>")}</div>
         </section>
         """
@@ -296,7 +285,7 @@ def generate_html_report(
     )
 
     html = f"""<!DOCTYPE html>
-<html lang="tr">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -318,13 +307,13 @@ def generate_html_report(
 </head>
 <body>
     <h1>{title}</h1>
-    <p class="subtitle">Grafikler ve görsel özet</p>
+    <p class="subtitle">Charts and visual summary</p>
     {ai_block}
     <section class="charts">{images_html}</section>
-    <footer>Big Data Analiz — Otomatik oluşturuldu</footer>
+    <footer>Big Data Analysis — Generated automatically</footer>
 </body>
 </html>
 """
-    report_path = out / "rapor.html"
+    report_path = out / "report.html"
     report_path.write_text(html, encoding="utf-8")
     return str(report_path)

@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 """
-Yapay zeka destekli veri özeti - veri seti hakkında Türkçe insight üretir.
-OPENAI_API_KEY ortam değişkeni tanımlıysa kullanılır; yoksa atlanır.
+AI-powered data summary — generates a short English insight from the dataset.
+Uses OPENAI_API_KEY if set; otherwise skipped.
 """
 
 import os
-import json
 
 
 def _get_openai_client():
-    """OpenAI istemcisini döndürür; yoksa None."""
+    """Return OpenAI client if available; otherwise None."""
     try:
         from openai import OpenAI
         api_key = os.environ.get("OPENAI_API_KEY", "").strip()
@@ -22,39 +21,39 @@ def _get_openai_client():
 
 def generate_insights(summary: dict, describe_text: str, correlation_text: str = "") -> str | None:
     """
-    Veri özetine göre Türkçe kısa yorum ve öneri üretir.
-    
+    Generate a short English summary and recommendations from the data overview.
+
     Args:
-        summary: analyzer.summary() çıktısı
-        describe_text: sayısal describe metni
-        correlation_text: korelasyon matrisi metni (opsiyonel)
-    
+        summary: Output of analyzer.summary() (keys: row_count, column_count, etc.)
+        describe_text: Numeric describe output as string
+        correlation_text: Correlation matrix as string (optional)
+
     Returns:
-        Türkçe insight metni veya None (API yok/hatada)
+        English insight text or None if API unavailable or error
     """
     client = _get_openai_client()
     if not client:
         return None
 
-    prompt = f"""Aşağıda bir veri setinin istatistik özeti var. Bu veriye dayanarak:
-1) 2-3 cümleyle veriyi özetle,
-2) Dikkat çeken noktaları (uç değerler, dağılım, eksik veri) kısaca belirt,
-3) İş zekası veya analiz için 1-2 pratik öneri ver.
+    prompt = f"""Below is a statistical summary of a dataset. Based on it:
+1) Summarize the data in 2–3 sentences.
+2) Briefly note anything notable (outliers, distribution, missing data).
+3) Give 1–2 practical recommendations for analysis or business intelligence.
 
-Yanıtı sadece Türkçe, net ve kısa tut (en fazla 6-7 cümle). Başlık ekleme, sadece paragraf yaz.
+Respond in English only, concisely (at most 6–7 sentences). No headings, just a short paragraph.
 
-VERİ ÖZETİ:
-- Satır sayısı: {summary.get('satır_sayısı', '?')}
-- Sütun sayısı: {summary.get('sütun_sayısı', '?')}
-- Sayısal sütunlar: {summary.get('sayısal_sütunlar', [])}
-- Kategorik sütunlar: {summary.get('kategorik_sütunlar', [])}
-- Eksik değerler: {summary.get('eksik_değerler', {})}
+DATA SUMMARY:
+- Row count: {summary.get('row_count', '?')}
+- Column count: {summary.get('column_count', '?')}
+- Numeric columns: {summary.get('numeric_columns', [])}
+- Categorical columns: {summary.get('categorical_columns', [])}
+- Missing values: {summary.get('missing_values', {})}
 
-Sayısal istatistikler:
+Numeric statistics:
 {describe_text[:1500]}
 """
     if correlation_text:
-        prompt += f"\nKorelasyon (özet):\n{correlation_text[:500]}\n"
+        prompt += f"\nCorrelation (summary):\n{correlation_text[:500]}\n"
 
     try:
         response = client.chat.completions.create(

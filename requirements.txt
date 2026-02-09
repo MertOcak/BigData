@@ -1,4 +1,4 @@
-# Big Data Analiz Uygulaması - Bağımlılıklar
+# Big Data Analysis Application — Dependencies
 pandas>=2.0.0
 numpy>=1.24.0
 matplotlib>=3.7.0
@@ -6,5 +6,5 @@ seaborn>=0.12.0
 openpyxl>=3.1.0
 scipy>=1.10.0
 
-# Yapay zeka özeti (opsiyonel; OPENAI_API_KEY gerekir)
+# AI summary (optional; requires OPENAI_API_KEY)
 openai>=1.0.0

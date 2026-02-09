@@ -1,78 +1,78 @@
-# Big Data Analiz Uygulaması
+# Big Data Analysis Application
 
-Verdiğiniz veri dosyasını (CSV, Excel, JSON, Parquet) yükleyip istatistiksel analiz yapan ve grafikler üreten Python uygulaması.
+A Python application that loads your data files (CSV, Excel, JSON, Parquet), runs statistical analysis, and generates charts and an optional AI-powered summary.
 
-## Kurulum
+## Installation
 
 ```bash
-git clone https://github.com/KULLANICI_ADINIZ/BigData.git
+git clone https://github.com/YOUR_USERNAME/BigData.git
 cd BigData
 pip install -r requirements.txt
 ```
 
-> **Not:** `KULLANICI_ADINIZ` yerine kendi GitHub kullanıcı adınızı yazın.
+> **Note:** Replace `YOUR_USERNAME` with your GitHub username.
 
-## Kullanım
+## Usage
 
-### Komut satırından (dosya yolu vererek)
-
-```bash
-python main.py "C:\veriler\satis.csv"
-```
-
-Çıktıları farklı bir klasöre yazmak için:
+### Command line (with file path)
 
 ```bash
-python main.py "veri.csv" -o raporlar
+python main.py "C:\data\sales.csv"
 ```
 
-Grafik oluşturmadan sadece sayısal analiz:
+To write outputs to a different folder:
 
 ```bash
-python main.py "veri.csv" --no-plots
+python main.py "data.csv" -o reports
 ```
 
-Yapay zeka özetini kapatmak için (varsayılan: açık, API anahtarı varsa):
+Numeric analysis only (no charts):
 
 ```bash
-python main.py "veri.csv" --no-ai
+python main.py "data.csv" --no-plots
 ```
 
-### Etkileşimli mod
+To disable the AI summary (enabled by default when API key is set):
 
-Dosya yolu vermeden çalıştırırsanız uygulama dosya yolunu sizden ister:
+```bash
+python main.py "data.csv" --no-ai
+```
+
+### Interactive mode
+
+If you run without a file path, the app will prompt for it:
 
 ```bash
 python main.py
 ```
 
-## Desteklenen dosya formatları
+## Supported file formats
 
-| Format   | Uzantı    |
-|----------|-----------|
-| CSV      | `.csv`    |
-| Excel    | `.xlsx`, `.xls` |
-| JSON     | `.json`   |
-| Parquet  | `.parquet` |
+| Format  | Extensions     |
+|---------|----------------|
+| CSV     | `.csv`         |
+| Excel   | `.xlsx`, `.xls`|
+| JSON    | `.json`        |
+| Parquet | `.parquet`     |
 
-## Ne yapar?
+## What it does
 
-1. **Veri yükleme**: Dosyayı otomatik format algılayarak yükler.
-2. **Genel özet**: Satır/sütun sayısı, sayısal/kategorik sütunlar, eksik değerler, bellek kullanımı.
-3. **Yapay zeka özeti** (opsiyonel): `OPENAI_API_KEY` tanımlıysa veriye dair Türkçe yorum ve öneri üretir (OpenAI API kullanır).
-4. **Sayısal istatistikler**: Min, max, ortalama, standart sapma, çeyrekler (describe).
-5. **Kategorik özet**: Benzersiz değer sayıları, en sık değerler.
-6. **Korelasyon matrisi**: Sayısal sütunlar arası korelasyon.
-7. **Gelişmiş grafikler** (varsayılan: `output` klasörü):
-   - Korelasyon ısı haritası ve özet dashboard
-   - Dağılım (histogram), kutu grafiği (box plot), scatter (iki sayısal sütun)
-   - Değer sayıları (renkli çubuk grafikler), eksik değer görselleştirmesi
-8. **HTML rapor**: Tüm grafiklerin ve AI özetinin toplandığı `output/rapor.html` (tarayıcıda açılır).
-9. **Örnek veri**: İlk 10.000 satır `output/veri_ornegi_ilk_10000.csv` olarak kaydedilir.
+1. **Data loading**: Loads the file based on its extension.
+2. **Overview**: Row/column counts, numeric/categorical columns, missing values, memory usage.
+3. **AI summary** (optional): When `OPENAI_API_KEY` is set, generates a short English summary and recommendations (uses OpenAI API).
+4. **Numeric statistics**: Min, max, mean, standard deviation, quartiles (describe).
+5. **Categorical summary**: Unique value counts and most frequent values.
+6. **Correlation matrix**: Correlation between numeric columns.
+7. **Charts** (default folder: `output`):
+   - Correlation heatmap and summary dashboard
+   - Distribution (histogram), box plot, scatter (two numeric columns)
+   - Value counts (bar charts), missing values visualization
+8. **HTML report**: All charts and the AI summary in one page: `output/report.html` (open in a browser).
+9. **Sample export**: First 10,000 rows saved as `output/sample_first_10000.csv`.
 
-### Yapay zeka özeti için
+### AI summary
 
-Ortam değişkeni olarak OpenAI API anahtarınızı tanımlayın (isteğe bağlı):
+Set your OpenAI API key as an environment variable (optional):
 
 ```bash
 # Windows (PowerShell)
@@ -82,37 +82,37 @@ $env:OPENAI_API_KEY = "sk-..."
 export OPENAI_API_KEY="sk-..."
 ```
 
-Anahtar yoksa uygulama AI özetini atlar; grafikler ve diğer analizler normal çalışır.
+Without the key, the AI summary is skipped; charts and other analysis still run.
 
-## Proje yapısı
+## Project structure
 
-| Dosya | Açıklama |
-|-------|----------|
-| `main.py` | Ana uygulama ve CLI |
-| `data_loader.py` | Dosyadan veri yükleme (CSV, Excel, JSON, Parquet) |
-| `analyzer.py` | İstatistik ve özet hesaplama |
-| `visualizer.py` | Gelişmiş grafikler ve HTML rapor |
-| `ai_insights.py` | Yapay zeka özeti (OpenAI API, opsiyonel) |
-| `generate_sample_data.py` | Örnek 10.000 satır rastgele veri üretir |
-| `requirements.txt` | Python bağımlılıkları |
-| `ornek_veri.csv` | Örnek veri (isteğe bağlı; script ile de üretilebilir) |
+| File | Description |
+|------|-------------|
+| `main.py` | Main application and CLI |
+| `data_loader.py` | Load data from CSV, Excel, JSON, Parquet |
+| `analyzer.py` | Statistics and summary computation |
+| `visualizer.py` | Charts and HTML report |
+| `ai_insights.py` | AI summary (OpenAI API, optional) |
+| `generate_sample_data.py` | Generate 10,000 rows of sample data |
+| `requirements.txt` | Python dependencies |
+| `sample_data.csv` | Sample data (optional; generated by script) |
 
-## Örnek veri ile test
+## Test with sample data
 
-10.000 satırlık örnek veri yoksa önce üretin:
+If you don’t have sample data, generate it first:
 
 ```bash
 python generate_sample_data.py
 ```
 
-Ardından analizi çalıştırın:
+Then run the analysis:
 
 ```bash
-python main.py ornek_veri.csv
+python main.py sample_data.csv
 ```
 
-Sonuçlar konsola yazılır, grafikler ve örnek export `output/` klasörüne kaydedilir.
+Results are printed to the console; charts and sample export are written to the `output/` folder.
 
-## Lisans
+## License
 
-MIT License — detaylar için [LICENSE](LICENSE) dosyasına bakın.
+MIT License — see the [LICENSE](LICENSE) file for details.
